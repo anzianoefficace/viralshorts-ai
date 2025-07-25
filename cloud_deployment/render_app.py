@@ -213,6 +213,18 @@ def start_poster():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/api/stop_poster', methods=['POST'])
+def stop_poster():
+    """Ferma daily poster"""
+    try:
+        if daily_poster:
+            daily_poster.stop()
+            return jsonify({'status': 'success', 'message': 'Daily poster stopped'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Daily poster not available'}), 500
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/force_post', methods=['POST'])
 def force_post():
     """Forza posting immediato"""
@@ -224,6 +236,17 @@ def force_post():
             return jsonify({'status': 'error', 'message': 'Daily poster not available'}), 500
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/test', methods=['GET', 'POST'])
+def test_api():
+    """Test API per debug"""
+    return jsonify({
+        'status': 'success',
+        'message': 'API is working!',
+        'timestamp': datetime.now().isoformat(),
+        'poster_available': daily_poster is not None,
+        'backend_available': backend is not None
+    })
 
 @app.route('/logs')
 def view_logs():
