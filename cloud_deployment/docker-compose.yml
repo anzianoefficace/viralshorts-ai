@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # 🌐 Web Application (Flask)
+  web:
+    build: 
+      context: .
+      dockerfile: cloud_deployment/Dockerfile
+    container_name: viralshorts_web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - FLASK_ENV=production
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:///data/viral_shorts.db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config.json:/app/config.json
+      - ./.env:/app/.env
+    depends_on:
+      - redis
+    networks:
+      - viralshorts_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ⚡ API Server (FastAPI)
+  api:
+    build: 
+      context: .
+      dockerfile: cloud_deployment/Dockerfile
+    container_name: viralshorts_api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:///data/viral_shorts.db
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config.json:/app/config.json
+      - ./.env:/app/.env
+    depends_on:
+      - redis
+    networks:
+      - viralshorts_network
+    restart: unless-stopped
+    command: ["uvicorn", "cloud_deployment.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  # 🤖 Background Worker (Celery)
+  worker:
+    build: 
+      context: .
+      dockerfile: cloud_deployment/Dockerfile
+    container_name: viralshorts_worker
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_URL=sqlite:///data/viral_shorts.db
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config.json:/app/config.json
+      - ./.env:/app/.env
+    depends_on:
+      - redis
+    networks:
+      - viralshorts_network
+    restart: unless-stopped
+    command: ["celery", "-A", "cloud_deployment.celery_app", "worker", "--loglevel=info"]
+
+  # 📅 Scheduler (Celery Beat)
+  scheduler:
+    build: 
+      context: .
+      dockerfile: cloud_deployment/Dockerfile
+    container_name: viralshorts_scheduler
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_URL=sqlite:///data/viral_shorts.db
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config.json:/app/config.json
+      - ./.env:/app/.env
+    depends_on:
+      - redis
+      - worker
+    networks:
+      - viralshorts_network
+    restart: unless-stopped
+    command: ["celery", "-A", "cloud_deployment.celery_app", "beat", "--loglevel=info"]
+
+  # 📊 Monitoring (Flower)
+  monitor:
+    build: 
+      context: .
+      dockerfile: cloud_deployment/Dockerfile
+    container_name: viralshorts_monitor
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - worker
+    networks:
+      - viralshorts_network
+    restart: unless-stopped
+    command: ["celery", "-A", "cloud_deployment.celery_app", "flower", "--port=5555"]
+
+  # 💾 Redis (Message Broker & Cache)
+  redis:
+    image: redis:7-alpine
+    container_name: viralshorts_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - viralshorts_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  viralshorts_network:
+    driver: bridge

@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "daily_target": 2,
+  "optimal_times": [
+    "10:00",
+    "16:00",
+    "21:00"
+  ],
+  "weekday_multiplier": 1.0,
+  "weekend_multiplier": 1.2,
+  "min_interval_hours": 6,
+  "max_posts_per_day": 3,
+  "backup_content_days": 7
+}

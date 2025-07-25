@@ -1,0 +1,113 @@
+{
+    "app_settings": {
+        "run_daily": false,
+        "daily_run_time": "10:00",
+        "max_videos_per_day": 1,
+        "languages": [
+            "en",
+            "es",
+            "fr",
+            "de",
+            "it"
+        ],
+        "selected_language": "en"
+    },
+    "youtube_search": {
+        "categories": {
+            "Entertainment": true,
+            "News": true,
+            "Sports": true,
+            "Curiosity": true,
+            "Lifestyle": true,
+            "Intrattenimento": true,
+            "Notizie": true,
+            "Sport": true,
+            "Curiosit\u00e0": true
+        },
+        "min_views": 1000,
+        "published_within_hours": 48,
+        "copyright_filter": false,
+        "max_duration": 90
+    },
+    "video_processing": {
+        "clip_durations": {
+            "15": true,
+            "30": true,
+            "60": true
+        },
+        "add_subtitles": true,
+        "add_highlighted_text": true,
+        "font_size": 24,
+        "font_color": "#FFFFFF",
+        "highlight_color": "#FF0000"
+    },
+    "upload": {
+        "upload_times": [
+            "12:00",
+            "18:00",
+            "21:00"
+        ],
+        "custom_hashtags": [
+            "viral",
+            "trending",
+            "shorts"
+        ],
+        "visibility": "public",
+        "auto_publish": true
+    },
+    "analytics": {
+        "measure_after_hours": 24,
+        "viral_score_threshold": 50,
+        "auto_learning": true,
+        "data_retention_days": 90
+    },
+    "scheduler": {
+        "daily_pipeline": {
+            "enabled": true,
+            "time": "08:00",
+            "max_retries": 3,
+            "retry_interval_minutes": 30
+        },
+        "cleanup_temp": {
+            "enabled": true,
+            "interval_hours": 6,
+            "file_age_hours": 24
+        },
+        "performance_monitoring": {
+            "enabled": true,
+            "interval_hours": 6
+        },
+        "weekly_report": {
+            "enabled": true,
+            "day_of_week": "sun",
+            "time": "23:59"
+        }
+    },
+    "fallback_controller": {
+        "auto_fallback_enabled": true,
+        "check_interval_minutes": 15,
+        "max_consecutive_failures": 3,
+        "quota_reset_check_hours": 24,
+        "enable_notifications": true,
+        "fallback_threshold_429_errors": 2
+    },
+    "automation": {
+        "advanced_features_enabled": true,
+        "auto_start_scheduler": true,
+        "enable_performance_tracking": true,
+        "enable_weekly_reports": true,
+        "enable_fallback_monitoring": true
+    },
+    "paths": {
+        "data": "data",
+        "downloads": "data/downloads",
+        "processed": "data/processed",
+        "uploads": "data/uploads",
+        "logs": "logs",
+        "database": "data/viral_shorts.db",
+        "reports": "data/reports",
+        "credentials": "data",
+        "temp": "data/temp"
+    },
+    "last_run_date": "2025-07-23T08:47:43.673593"
+}

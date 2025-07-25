@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ViralShortsAI Cloud{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- System Status -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-server"></i> Status Sistema
+                </h5>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="status-indicator status-{{ 'online' if system_status.online else 'offline' }}"></span>
+                    <span class="card-text">
+                        {{ 'Online' if system_status.online else 'Offline' }}
+                    </span>
+                </div>
+                <p class="card-text">
+                    <small>Ultimo aggiornamento: {{ system_status.last_update }}</small><br>
+                    <small>Uptime: {{ system_status.uptime }}</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Poster Status -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-robot"></i> Daily Auto Poster
+                </h5>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="status-indicator status-{{ 'online' if poster_status.is_running else 'offline' }}"></span>
+                    <span class="card-text">
+                        {{ 'Attivo' if poster_status.is_running else 'Inattivo' }}
+                    </span>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <button class="btn btn-success btn-sm w-100" onclick="startPoster()">
+                            <i class="fas fa-play"></i> Avvia
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-danger btn-sm w-100" onclick="stopPoster()">
+                            <i class="fas fa-stop"></i> Ferma
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Metriche -->
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card metric-card">
+            <div class="metric-value">{{ poster_status.posts_today }}</div>
+            <div class="metric-label">Post Oggi</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card metric-card">
+            <div class="metric-value">{{ poster_status.daily_target }}</div>
+            <div class="metric-label">Target Giornaliero</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card metric-card">
+            <div class="metric-value">{{ poster_status.consecutive_days }}</div>
+            <div class="metric-label">Giorni Consecutivi</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card metric-card">
+            <div class="metric-value">{{ videos_ready }}</div>
+            <div class="metric-label">Video Pronti</div>
+        </div>
+    </div>
+</div>
+
+<!-- Controlli Rapidi -->
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-bolt"></i> Controlli Rapidi
+                </h5>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <button class="btn btn-primary w-100" onclick="forcePost()">
+                            <i class="fas fa-upload"></i> Forza Post Immediato
+                        </button>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button class="btn btn-info w-100" onclick="refreshStatus()">
+                            <i class="fas fa-sync"></i> Aggiorna Status
+                        </button>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="/config" class="btn btn-secondary w-100">
+                            <i class="fas fa-cog"></i> Configurazione
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiche Giornaliere -->
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-line"></i> Statistiche Giornaliere
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Upload oggi:</strong> {{ daily_stats.uploads_count }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Video pubblici:</strong> {{ daily_stats.public_uploads }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Primo upload:</strong> {{ daily_stats.first_upload or 'N/A' }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Ultimo upload:</strong> {{ daily_stats.last_upload or 'N/A' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast per notifiche -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="notification" class="toast" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">Notifica</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="notification-body">
+            <!-- Messaggio dinamico -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showNotification(message, type = 'info') {
+    const toast = document.getElementById('notification');
+    const body = document.getElementById('notification-body');
+    
+    body.textContent = message;
+    toast.className = `toast text-bg-${type}`;
+    
+    const toastInstance = new bootstrap.Toast(toast);
+    toastInstance.show();
+}
+
+function startPoster() {
+    fetch('/api/start_poster', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showNotification(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showNotification('Errore di connessione', 'danger');
+        });
+}
+
+function stopPoster() {
+    fetch('/api/stop_poster', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showNotification(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showNotification('Errore di connessione', 'danger');
+        });
+}
+
+function forcePost() {
+    showNotification('Avvio post forzato...', 'info');
+    
+    fetch('/api/force_post', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 3000);
+            } else {
+                showNotification(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showNotification('Errore di connessione', 'danger');
+        });
+}
+
+function refreshStatus() {
+    location.reload();
+}
+</script>
+{% endblock %}

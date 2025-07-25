@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# App specific
+data/downloads/*
+data/processed/*
+data/uploads/*
+data/temp/*
+logs/*.log
+backups/
+*.db
+youtube_credentials.json
+
+# Keep directory structure
+!data/downloads/.gitkeep
+!data/processed/.gitkeep
+!data/uploads/.gitkeep
+!data/temp/.gitkeep
+!logs/.gitkeep

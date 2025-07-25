@@ -1,0 +1,45 @@
+{
+  "name": "ViralShortsAI",
+  "description": "AI-powered viral shorts automation platform",
+  "repository": "https://github.com/YOUR_USERNAME/viralshorts-ai",
+  "logo": "https://avatars.githubusercontent.com/u/1?s=200&v=4",
+  "keywords": ["python", "ai", "youtube", "automation", "viral", "shorts"],
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "OPENAI_API_KEY": {
+      "description": "Your OpenAI API key for GPT integration",
+      "required": true
+    },
+    "YOUTUBE_CLIENT_ID": {
+      "description": "YouTube API Client ID",
+      "required": true
+    },
+    "YOUTUBE_CLIENT_SECRET": {
+      "description": "YouTube API Client Secret", 
+      "required": true
+    },
+    "SECRET_KEY": {
+      "description": "Flask secret key",
+      "generator": "secret"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    },
+    {
+      "plan": "heroku-redis:mini"
+    }
+  ]
+}
