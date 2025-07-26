@@ -28,10 +28,29 @@ logger = logging.getLogger(__name__)
 # Import componenti principali
 try:
     from flask import Flask, render_template, jsonify, request
-    from database import Database
-    from daily_auto_poster import DailyAutoPoster
-    from main import ViralShortsBackend
-    logger.info("✅ Imports successful")
+    logger.info("✅ Flask imported successfully")
+    
+    # Prova ad importare i componenti uno per uno per debug
+    try:
+        sys.path.append('..')  # Aggiungi parent directory
+        from database import Database
+        logger.info("✅ Database imported successfully")
+    except ImportError as e:
+        logger.error(f"❌ Database import error: {e}")
+    
+    try:
+        from daily_auto_poster import DailyAutoPoster
+        logger.info("✅ DailyAutoPoster imported successfully")
+    except ImportError as e:
+        logger.error(f"❌ DailyAutoPoster import error: {e}")
+    
+    try:
+        from main import ViralShortsBackend
+        logger.info("✅ ViralShortsBackend imported successfully")
+    except ImportError as e:
+        logger.error(f"❌ ViralShortsBackend import error: {e}")
+        
+    logger.info("✅ All imports successful")
 except ImportError as e:
     logger.error(f"❌ Import error: {e}")
     # Fallback per ambiente Render
